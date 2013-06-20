@@ -7,6 +7,7 @@
 #include <math.h>
 #include "sha1.h"
 #include <fstream>
+#include <time.h>
 
 using namespace std;
 
@@ -21,14 +22,15 @@ inline void generateString(uint64_t block, char str[9])
     };
 
     // each 6-bit defines a char
-    str[0] = chars[(block>>42) & 0x3F]; // 42...47 bit
-    str[1] = chars[(block>>36) & 0x3F]; // 36...41 bit
-    str[2] = chars[(block>>30) & 0x3F]; // 30...35 bit
-    str[3] = chars[(block>>24) & 0x3F]; // 24...29 bit
-    str[4] = chars[(block>>18) & 0x3F]; // 18...23 bit
-    str[5] = chars[(block>>12) & 0x3F]; // 12...17 bit
-    str[6] = chars[(block>> 6) & 0x3F]; //  6...11 bit
-    str[7] = chars[(block    ) & 0x3F]; //  0... 5 bit
+    str[0] = chars[(block    ) & 0x3F]; //  0... 5 bit
+    str[1] = chars[(block>> 6) & 0x3F]; //  6...11 bit
+    str[2] = chars[(block>>12) & 0x3F]; // 12...17 bit
+    str[3] = chars[(block>>18) & 0x3F]; // 18...23 bit
+    str[4] = chars[(block>>24) & 0x3F]; // 24...29 bit
+    str[5] = chars[(block>>30) & 0x3F]; // 30...35 bit
+    str[6] = chars[(block>>36) & 0x3F]; // 36...41 bit
+    str[7] = chars[(block>>42) & 0x3F]; // 42...47 bit
+
     str[8] = '\0';
 }
 
@@ -67,12 +69,19 @@ void method1()
     SHA1 sha;
     uint32_t sha1hash[5];
 
-    for(uint64_t subSpace=0; subSpace < maxSubSpace; ++subSpace)
-    {
-        map<uint64_t, uint64_t> hashMap;
+    srand(time(NULL));
 
-        for(uint64_t block = subSpace*maxBlock; block < maxBlock + subSpace*maxBlock; ++block)
+    map<uint64_t, uint64_t> hashMap;
+
+    while(1)
+    {
+        uint64_t subSpace = (uint64_t)((double)rand()/(double)RAND_MAX * (double)maxSubSpace);
+
+        cout << "Computing subspace " << dec << subSpace << " (" << dec << (subSpace*maxBlock/megaBlock) << ".." << dec << ((subSpace+1)*maxBlock/megaBlock) << "M hashes)" << endl;
+
+        for(uint64_t i = 0; i < maxBlock; ++i)
         {
+            uint64_t block = i + subSpace*maxBlock;
             uint64_t hash52;
             generateString(block, str);
 
@@ -105,16 +114,17 @@ void method1()
                 }
             }
 
-            if( (block % megaBlock) == 0 )
+            if( (i % megaBlock) == 0 )
             {
-                cout << "Computed " << dec << (block/megaBlock) << "/" << dec << (maxBlock/megaBlock) << "M hashes. Last key " << str << endl;
+                cout << "Computed " << dec << (i/megaBlock) << "/" << dec << (maxBlock/megaBlock) << "M hashes. Last key " << str << endl;
             }
         }
 
-        cout << "Subspace " << dec << subSpace << " is over. Computing next one." << endl;
-    }
+        cout << "Subspace " << dec << subSpace << " is over." << endl;
+        cout << "Clearing memory." << endl;
 
-    cout << "DONE!" << endl; // This line is practically unreachable!
+        hashMap.clear();
+    }
 }
 
 void method2()
