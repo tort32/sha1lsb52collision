@@ -1,4 +1,4 @@
-[SHA1LBS52Collision Sources License]
+[SHA1LSB52Collision Sources License]
 Copyright (c) 2013, Aleksandra Menshchikova
 All rights reserved.
 

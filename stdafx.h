@@ -27,14 +27,14 @@ typedef unsigned char uint8_t;
 #include <limits.h>
 
 #define GET64(hi,lo) ((((uint64_t)(hi))<<32LL)|((uint64_t)(lo)))
-#define LBS52(x) (x & 0x000FFFFFFFFFFFFFLL)
-#define LBS48(x) (x & 0x0000FFFFFFFFFFFFLL)
-#define LBS40(x) (x & 0x000000FFFFFFFFFFLL)
-#define LBS32(x) (x &         0xFFFFFFFFLL)
-#define LBS30(x) (x &         0x3FFFFFFFLL)
-#define LBS28(x) (x &         0x0FFFFFFFLL)
-#define LBS26(x) (x &         0x03FFFFFFLL)
-#define LBS24(x) (x &         0x00FFFFFFLL)
-#define LBS16(x) (x &         0x0000FFFFLL)
+#define LSB52(x) (x & 0x000FFFFFFFFFFFFFLL)
+#define LSB48(x) (x & 0x0000FFFFFFFFFFFFLL)
+#define LSB40(x) (x & 0x000000FFFFFFFFFFLL)
+#define LSB32(x) (x &         0xFFFFFFFFLL)
+#define LSB30(x) (x &         0x3FFFFFFFLL)
+#define LSB28(x) (x &         0x0FFFFFFFLL)
+#define LSB26(x) (x &         0x03FFFFFFLL)
+#define LSB24(x) (x &         0x00FFFFFFLL)
+#define LSB16(x) (x &         0x0000FFFFLL)
 
 void DisplayMessageDigest(uint32_t sha1hash[5]);

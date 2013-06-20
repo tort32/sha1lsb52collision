@@ -86,7 +86,7 @@ void method1()
             }
             else
             {
-                hash52 = LBS52(GET64(sha1hash[3],sha1hash[4]));
+                hash52 = LSB52(GET64(sha1hash[3],sha1hash[4]));
 
                 map<uint64_t, uint64_t>::iterator it = hashMap.find(hash52);
                 if(it == hashMap.end())
@@ -149,7 +149,7 @@ void method2()
         }
         else
         {
-            hash24 = LBS24(GET64(sha1hash[3],sha1hash[4]));
+            hash24 = LSB24(GET64(sha1hash[3],sha1hash[4]));
             hashSet24.insert(hash24);
         }
 
@@ -180,10 +180,10 @@ void method2()
         }
         else
         {
-            hash28 = LBS28(GET64(sha1hash[3],sha1hash[4]));
+            hash28 = LSB28(GET64(sha1hash[3],sha1hash[4]));
 
             // store longer hash if smaller is colliding
-            uint32_t hash24 = LBS24(hash28);
+            uint32_t hash24 = LSB24(hash28);
             if(hashSet24.find(hash24) != hashSet24.end())
             {
                 hashSet28.insert(hash28);
@@ -219,10 +219,10 @@ void method2()
         }
         else
         {
-            hash30 = LBS30(GET64(sha1hash[3],sha1hash[4]));
+            hash30 = LSB30(GET64(sha1hash[3],sha1hash[4]));
 
             // store longer hash if smaller is colliding
-            uint32_t hash28 = LBS28(hash30);
+            uint32_t hash28 = LSB28(hash30);
             if(hashSet28.find(hash28) != hashSet28.end())
             {
                 hashSet30.insert(hash30);
