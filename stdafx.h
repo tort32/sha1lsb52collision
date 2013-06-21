@@ -26,6 +26,10 @@ typedef unsigned char uint8_t;
 #include <iostream>
 #include <limits.h>
 
+#include <vector>
+#include <set>
+#include <map>
+
 #define GET64(hi,lo) ((((uint64_t)(hi))<<32LL)|((uint64_t)(lo)))
 #define LSB52(x) (x & 0x000FFFFFFFFFFFFFLL)
 #define LSB48(x) (x & 0x0000FFFFFFFFFFFFLL)
@@ -38,3 +42,5 @@ typedef unsigned char uint8_t;
 #define LSB16(x) (x &         0x0000FFFFLL)
 
 void DisplayMessageDigest(uint32_t sha1hash[5]);
+
+void Test1();

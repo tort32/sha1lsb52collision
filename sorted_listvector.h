@@ -4,56 +4,66 @@
 #include <list>
 #include <assert.h>
 
-template<class T>
-class sorted_vector
+template<class T, class A = std::allocator<T>>
+class sorted_vector: public std::vector<T,A>
 {
 public:
   void insert(const T& value)
   {
-    size_t size = mVector.size();
+    size_t n = size();
 
-    if(size == 0)
+    if(n == 0)
     {
-      mVector.push_back(value);
+      vector::push_back(value);
     }
-    else if(size == 1)
+    else if(n == 1)
     {
-      if(mVector[0] < value)
-        mVector.push_back(value);
+      if(at(0) < value)
+      {
+        vector::insert(end(),value);
+      }
       else
-        mVector.insert(mVector.begin(),value);
+      {
+        vector::insert(begin(),value);
+      }
     }
     else
     {
       // binary search
       size_t left = 0;
-      size_t right = size - 1;
+      size_t right = n - 1;
 
-      while(right - left <= 1)
+      while(right - left >= 1)
       {
-        if(mVector[left] >= value)
+        if(at(left) >= value)
         {
-          mVector.insert(mVector.begin() + left, value);
+          vector::insert(begin() + left, value);
           return;
         }
 
-        if(mVector[right] <= value)
+        if(at(right) <= value)
         {
-          mVector.insert(mVector.begin() + right + 1, value);
+          vector::insert(begin() + right + 1, value);
+          return;
+        }
+
+        if(right - left == 1)
+        {
+          vector::insert(begin() + right, value);
           return;
         }
 
         size_t mid = left + ((right - left) >> 1);
         if(mid == left)
         {
-          mVector.insert(mVector.begin() + left, value);
+          vector::insert(begin() + left, value);
           return;
         }
 
-        const T& midVal = mVector[mid];
+        const T& midVal = at(mid);
         if(midVal == value)
         {
-          mVector.insert(mVector.begin() + mid, value);
+          vector::insert(begin() + mid, value);
           return;
         }
         else if(value < midVal)
@@ -65,38 +75,32 @@ public:
           left = mid;
         }
       }
+
+      assert(0);
     }
   }
 
-  std::vector<T>::iterator begin()
+  iterator find(const T& value)
   {
-    return mVector.begin();
+    // TODO:
   }
 
-  std::vector<T>::iterator end()
+  bool has(const T& value)
   {
-    return mVector.end();
-  }
-
-  std::vector<T>::iterator find(const T& value)
-  {
-
+    return find(value) != end();
   }
 
   const T& left()
   {
-    assert(mVector.size() != 0);
-    return mVector[0];
+    assert(size() != 0);
+    return *begin();
   }
 
   const T& right()
   {
-    assert(mVector.size() != 0);
-    return mVector[mVector.size() - 1];
+    assert(size() != 0);
+    return *rend();
   }
-
-private:
-  std::vector<T> mVector;
 };
 
 template<class T>
@@ -109,17 +113,17 @@ public:
 
     if(it == mList.end()) // insert first value
     {
-      vector<T> vec;
-      vec.push_back();
-      mList.push_back()
+      sorted_vector<T> vec;
+      vec.insert(value);
+      mList.push_back(vec);
     }
 
-
+    // TODO:
   }
 
   bool has(const T& value)
   {
-
+    // TODO:
   }
 
 private:

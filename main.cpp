@@ -1,9 +1,5 @@
 #include "stdafx.h"
 
-#include <vector>
-#include <set>
-#include <map>
-
 #include <math.h>
 #include "sha1.h"
 #include <fstream>
@@ -254,7 +250,9 @@ void method2()
 
 int main()
 {
-    method1();
+    //method1();
+
+    Test1();
 
     return 0;
 }
