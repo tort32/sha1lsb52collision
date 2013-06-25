@@ -44,3 +44,5 @@ typedef unsigned char uint8_t;
 void DisplayMessageDigest(uint32_t sha1hash[5]);
 
 void Test1();
+void Test2();
+void Test3();

@@ -10,79 +10,99 @@ class sorted_vector: public std::vector<T,A>
 public:
   void insert(const T& value)
   {
-    size_t n = size();
+    // binary search
+    size_t left = 0; // inclusive index
+    size_t right = size(); // exclusive index
 
-    if(n == 0)
+    while(right > left)
     {
-      vector::push_back(value);
-    }
-    else if(n == 1)
-    {
-      if(at(0) < value)
+      if(at(left) >= value)
       {
-        vector::insert(end(),value);
-      }
-      else
-      {
-        vector::insert(begin(),value);
-      }
-    }
-    else
-    {
-      // binary search
-      size_t left = 0;
-      size_t right = n - 1;
-
-      while(right - left >= 1)
-      {
-        if(at(left) >= value)
-        {
-          vector::insert(begin() + left, value);
-          return;
-        }
-
-        if(at(right) <= value)
-        {
-          vector::insert(begin() + right + 1, value);
-          return;
-        }
-
-        if(right - left == 1)
-        {
-          vector::insert(begin() + right, value);
-          return;
-        }
-
-        size_t mid = left + ((right - left) >> 1);
-        if(mid == left)
-        {
-          vector::insert(begin() + left, value);
-          return;
-        }
-
-        const T& midVal = at(mid);
-        if(midVal == value)
-        {
-          vector::insert(begin() + mid, value);
-          return;
-        }
-        else if(value < midVal)
-        {
-          right = mid;
-        }
-        else // value > midVal
-        {
-          left = mid;
-        }
+        vector::insert(begin() + left, value);
+        return;
       }
 
-      assert(0);
+      if(value >= at(right - 1))
+      {
+        vector::insert(begin() + right, value);
+        return;
+      }
+
+      // found two nearest elements and the value between them
+      // at(left) < value < at(right - 1)
+      if( left + 1 == right - 1 )
+      {
+        vector::insert(begin() + left + 1, value);
+        return;
+      }
+
+      // split a range
+      size_t mid = left + ((right - left) >> 1);
+
+      // choose a side
+      if(value < at(mid))
+      {
+        right = mid;
+      }
+      else // value >= at(mid)
+      {
+        left = mid;
+      }
     }
+
+    vector::push_back(value);
   }
 
   iterator find(const T& value)
   {
-    // TODO:
+    // binary search
+    size_t left = 0; // inclusive index
+    size_t right = size(); // exclusive index
+
+    while(right > left)
+    {
+      if(at(left) == value)
+      {
+        return begin() + left;
+      }
+
+      if(at(right - 1) == value)
+      {
+        return begin() + (right - 1);
+      }
+
+      if(at(left) > value)
+      {
+        return end();
+      }
+
+      if(value > at(right - 1))
+      {
+        return end();
+      }
+
+      // found two nearest elements and the value between them
+      // at(left) < value < at(right - 1)
+      if( left + 1 == right - 1 )
+      {
+        return end();
+      }
+
+      // split a range
+      size_t mid = left + ((right - left) >> 1);
+
+      // choose a side
+      if(value < at(mid))
+      {
+        right = mid;
+      }
+      else // value >= at(mid)
+      {
+        left = mid;
+      }
+    }
+
+    return end();
   }
 
   bool has(const T& value)

@@ -252,7 +252,7 @@ int main()
 {
     //method1();
 
-    Test1();
+    Test3();
 
     return 0;
 }
