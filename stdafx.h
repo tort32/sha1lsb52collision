@@ -27,6 +27,7 @@ typedef unsigned char uint8_t;
 #include <limits.h>
 
 #include <vector>
+#include <list>
 #include <set>
 #include <map>
 
@@ -42,7 +43,12 @@ typedef unsigned char uint8_t;
 #define LSB16(x) (x &         0x0000FFFFLL)
 
 void DisplayMessageDigest(uint32_t sha1hash[5]);
+float twoPow(uint8_t pow);
 
 void Test1();
 void Test2();
 void Test3();
+void Test4();
+void Test5();
+void Test6();
+void Test7();

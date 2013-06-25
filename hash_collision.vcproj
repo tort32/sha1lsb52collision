@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1251"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="hash_collision"
 	ProjectGUID="{C0CF7A5F-71A2-49E2-B77C-97805DC36EEE}"
 	RootNamespace="hash_collision"
@@ -196,7 +196,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\test.cpp"
+				RelativePath=".\test_sorted_listvector.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\test_sorted_vector.cpp"
 				>
 			</File>
 		</Filter>

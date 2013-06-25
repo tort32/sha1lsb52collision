@@ -4,6 +4,7 @@
 #include "sha1.h"
 #include <fstream>
 #include <time.h>
+#include "sorted_listvector.h"
 
 using namespace std;
 
@@ -65,8 +66,6 @@ void method1()
     SHA1 sha;
     uint32_t sha1hash[5];
 
-    srand(time(NULL));
-
     map<uint64_t, uint64_t> hashMap;
 
     while(1)
@@ -123,6 +122,15 @@ void method1()
     }
 }
 
+#define PRINT_DEBUG(x) \
+  { \
+  uint64_t count = hashSet##x.size_total(); \
+  uint64_t capacity = hashSet##x.capacity_total(); \
+  uint64_t max = 1LL << ##x##LL; \
+  printf("ListSet fill: %dM/%dM = %.2f %%\n", (uint32_t)(count/megaBlock), (uint32_t)(capacity/megaBlock), (100.f*(float)count/(float)capacity)); \
+  printf("Total number of %d-bit hashes: %dM (%.2f %%)\n", x, (uint32_t)(count/megaBlock), (100.f*(float)count)/(float)max); \
+  }
+
 void method2()
 {
     // NOT YET FINISHED
@@ -131,7 +139,7 @@ void method2()
     // Since we have no enough memory for storing all possible hashes
     // We can use smaller hash size to find a possible collision on longer hash
     // So we reject big amount of useless hashes that not colliding on smaller hash size
-    set<uint32_t> hashSet24;
+    listset<uint32_t> hashSet24;
 
     char str[9];
     memset(str, 0, 9);
@@ -165,11 +173,9 @@ void method2()
         }
     }
 
-    uint32_t count24 = hashSet24.size();
-    float max24 = powf(2.f,24.f);
-    printf("Total number of 24-bit hashes: %dM (%.2f %%)\n", count24/megaBlock, ((float)count24)/max24*100.f);
+    PRINT_DEBUG(24);
 
-    set<uint32_t> hashSet28;
+    listset<uint32_t> hashSet28;
     for(uint64_t block = 0; block < maxBlock; ++block)
     {
         uint32_t hash28;
@@ -190,7 +196,7 @@ void method2()
 
             // store longer hash if smaller is colliding
             uint32_t hash24 = LSB24(hash28);
-            if(hashSet24.find(hash24) != hashSet24.end())
+            if(hashSet24.has(hash24))
             {
                 hashSet28.insert(hash28);
             }
@@ -204,11 +210,9 @@ void method2()
 
     hashSet24.clear();
 
-    uint32_t count28 = hashSet28.size();
-    float max28 = powf(2.f,28.f);
-    printf("Total number of 28-bit hashes: %dM (%.2f %%)\n", count28/megaBlock, ((float)count28)/max28*100.f);
+    PRINT_DEBUG(28);
 
-    set<uint32_t> hashSet30;
+    listset<uint32_t> hashSet30;
     for(uint64_t block = 0; block < maxBlock; ++block)
     {
         uint32_t hash30;
@@ -229,7 +233,7 @@ void method2()
 
             // store longer hash if smaller is colliding
             uint32_t hash28 = LSB28(hash30);
-            if(hashSet28.find(hash28) != hashSet28.end())
+            if(hashSet28.has(hash28))
             {
                 hashSet30.insert(hash30);
             }
@@ -243,16 +247,14 @@ void method2()
 
     hashSet28.clear();
 
-    uint32_t count30 = hashSet30.size();
-    float max30 = powf(2.f,30.f);
-    printf("Total number of 30-bit hashes: %dM (%.2f %%)\n", count30/megaBlock, ((float)count30)/max30*100.f);
+    PRINT_DEBUG(30);
 }
 
 int main()
 {
-    //method1();
+    srand((unsigned int)time(NULL));
 
-    Test3();
+    method2();
 
     return 0;
 }

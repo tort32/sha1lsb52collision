@@ -1,14 +1,17 @@
 #pragma once
 
-#include <vector>
-#include <list>
+#include "stdafx.h"
 #include <assert.h>
 
 template<class T, class A = std::allocator<T>>
 class sorted_vector: public std::vector<T,A>
 {
 public:
-  void insert(const T& value)
+  sorted_vector(): vector() {}
+
+  sorted_vector(iterator from, iterator to): vector(from, to) {} // supposed input range is sorted
+
+  void insert(const T& val)
   {
     // binary search
     size_t left = 0; // inclusive index
@@ -16,15 +19,15 @@ public:
 
     while(right > left)
     {
-      if(at(left) >= value)
+      if(at(left) >= val)
       {
-        vector::insert(begin() + left, value);
+        vector::insert(begin() + left, val);
         return;
       }
 
-      if(value >= at(right - 1))
+      if(val >= at(right - 1))
       {
-        vector::insert(begin() + right, value);
+        vector::insert(begin() + right, val);
         return;
       }
 
@@ -32,7 +35,7 @@ public:
       // at(left) < value < at(right - 1)
       if( left + 1 == right - 1 )
       {
-        vector::insert(begin() + left + 1, value);
+        vector::insert(begin() + left + 1, val);
         return;
       }
 
@@ -40,7 +43,7 @@ public:
       size_t mid = left + ((right - left) >> 1);
 
       // choose a side
-      if(value < at(mid))
+      if(val < at(mid))
       {
         right = mid;
       }
@@ -50,10 +53,10 @@ public:
       }
     }
 
-    vector::push_back(value);
+    vector::push_back(val);
   }
 
-  iterator find(const T& value)
+  const_iterator find(const T& val) const
   {
     // binary search
     size_t left = 0; // inclusive index
@@ -61,22 +64,22 @@ public:
 
     while(right > left)
     {
-      if(at(left) == value)
+      if(at(left) == val)
       {
         return begin() + left;
       }
 
-      if(at(right - 1) == value)
+      if(at(right - 1) == val)
       {
         return begin() + (right - 1);
       }
 
-      if(at(left) > value)
+      if(at(left) > val)
       {
         return end();
       }
 
-      if(value > at(right - 1))
+      if(val > at(right - 1))
       {
         return end();
       }
@@ -92,7 +95,7 @@ public:
       size_t mid = left + ((right - left) >> 1);
 
       // choose a side
-      if(value < at(mid))
+      if(val < at(mid))
       {
         right = mid;
       }
@@ -105,47 +108,207 @@ public:
     return end();
   }
 
-  bool has(const T& value)
+  bool has(const T& val) const
   {
-    return find(value) != end();
+    return find(val) != end();
   }
 
-  const T& left()
+  const T& left() const
   {
     assert(size() != 0);
-    return *begin();
+    return (*this)[0];
+    //return *begin();
   }
 
-  const T& right()
+  const T& right() const
   {
     assert(size() != 0);
-    return *rend();
+    //return *rend();
+    return (*this)[size() - 1];
   }
 };
 
-template<class T>
-class sorted_listvector
+template<class T, class A = std::allocator<T>>
+class sorted_listvector: public std::list< sorted_vector<T,A> >
 {
 public:
-  void insert(T value)
-  {
-    std::list< sorted_vector<T> >::iterator it = mList.begin();
+  sorted_listvector(size_t batchSize = 1024) : list(), mBatchSize(batchSize) {}
 
-    if(it == mList.end()) // insert first value
+  void insert(const T& val)
+  {
+    for(std::list< sorted_vector<T,A> >::iterator it = begin(); it != end(); ++it)
     {
-      sorted_vector<T> vec;
-      vec.insert(value);
-      mList.push_back(vec);
+      // If value is not in this range, move to the next
+      std::list< sorted_vector<T,A> >::iterator itNext = it;
+      if( val > it->right() && ++itNext != end())
+      {
+        continue;
+      }
+
+      // if the current range has place to insert
+      if(it->size() < mBatchSize)
+      {
+        it->insert(val);
+        return;
+      }
+      else
+      {
+        // split
+        size_t mid = it->size() >> 1;
+        sorted_vector<T,A> vecLeft(it->begin(),it->begin() + mid);
+        sorted_vector<T,A> vecRight(it->begin() + mid,it->end());
+
+        if(val < vecRight.left())
+        {
+          vecLeft.insert(val);
+        }
+        else
+        {
+          vecRight.insert(val);
+        }
+
+        *it = vecRight;
+        list::insert(it, vecLeft);
+        return;
+      }
     }
 
-    // TODO:
+    // insert first value
+    {
+      sorted_vector<T,A> vec;
+      vec.insert(val);
+      list::push_back(vec);
+    }
   }
 
-  bool has(const T& value)
+  size_t size_total() const
   {
-    // TODO:
+    size_t total = 0;
+    for(std::list< sorted_vector<T,A> >::const_iterator it = begin(); it != end(); ++it)
+    {
+      total += it->size();
+    }
+    return total;
+  }
+
+  size_t capacity_total() const
+  {
+    size_t total = 0;
+    for(std::list< sorted_vector<T,A> >::const_iterator it = begin(); it != end(); ++it)
+    {
+      total += it->capacity();
+    }
+    return total;
+    //return mBatchSize * size();
+  }
+
+  bool has(const T& val)
+  {
+    for(std::list< sorted_vector<T,A> >::iterator it = begin(); it != end(); ++it)
+    {
+      if( val > it->right())
+      {
+        continue;
+      }
+      else
+      {
+        return it->has(val);
+      }
+    }
+    return false;
   }
 
 private:
-  std::list< sorted_vector<T> > mList;
+  size_t mBatchSize;
+};
+
+template<class T>
+class listset: public std::list< std::set<T> >
+{
+public:
+  listset(size_t batchSize = 16777216) : list(), mBatchSize(batchSize) {}
+
+  void insert(const T& val)
+  {
+    for(std::list< std::set<T> >::iterator it = begin(); it != end(); ++it)
+    {
+      // If value is not in this range, move to the next
+      std::list< std::set<T> >::iterator itNext = it;
+      if( val > *(it->rbegin()) && ++itNext != end())
+      {
+        continue;
+      }
+
+      // if the current range has place to insert
+      if(it->size() < mBatchSize)
+      {
+        it->insert(val);
+        return;
+      }
+      else
+      {
+        // split
+        size_t mid = it->size() >> 1;
+        std::set<T>::iterator itMid = it->begin();
+        for(size_t i = 0; i<mid; ++i) { ++itMid; }
+        //std::set<T>::iterator itMid = it->begin() + mid;
+        std::set<T> vecLeft(it->begin(),itMid);
+        std::set<T> vecRight(itMid,it->end());
+
+        if(val < *vecRight.begin())
+        {
+          vecLeft.insert(val);
+        }
+        else
+        {
+          vecRight.insert(val);
+        }
+
+        *it = vecRight;
+        list::insert(it, vecLeft);
+        return;
+      }
+    }
+
+    // insert first value
+    {
+      std::set<T> vec;
+      vec.insert(val);
+      list::push_back(vec);
+    }
+  }
+
+  uint64_t size_total() const
+  {
+    uint64_t total = 0;
+    for(std::list< std::set<T> >::const_iterator it = begin(); it != end(); ++it)
+    {
+      total += it->size();
+    }
+    return total;
+  }
+
+  uint64_t capacity_total() const
+  {
+    return size() * mBatchSize;
+  }
+
+  bool has(const T& val)
+  {
+    for(std::list< std::set<T> >::iterator it = begin(); it != end(); ++it)
+    {
+      if( val > *(it->rbegin()))
+      {
+        continue;
+      }
+      else
+      {
+        return it->find(val) != it->end();
+      }
+    }
+    return false;
+  }
+
+private:
+  size_t mBatchSize;
 };
